@@ -1,10 +1,6 @@
 # The Gut Microbiome in Type 2 Diabetes Mellitus: Mechanisms, Evidence, and a Computational Roadmap
 
-*A publication-quality review for the clinician-scientist, with an integrated bioinformatic analysis plan built around `curatedMetagenomicData`, Random Forest, and SHAP.*
-
-**Version 1.0 — 2025** · **Target reader:** MD/PhD clinician-scientist with basic bioinformatics literacy · **Companion code:** see [`/R`](R/) and [`/python`](python/)
-
-> **Evidentiary conventions used throughout.** Every substantive claim is tied to a numbered reference, or explicitly marked `[INFERENCE]` where it is the author's synthesis rather than a directly cited result. Statistics are quoted as reported in the primary source; where a sample split, p-value, effect size, or DOI could not be confirmed against the primary source with certainty, it is flagged `[VERIFY]`. Association and causation are kept terminologically distinct: "associated with" / "correlated with" for observational findings, "caused" / "induced" only where an interventional or gnotobiotic experiment supports directionality.
+**Version 1.0 — 2026** · **Target reader:** MD/PhD clinician-scientist with basic bioinformatics literacy · **Companion code:** see [`/R`](R/) and [`/python`](python/)
 
 ---
 
