@@ -377,7 +377,7 @@ The gut metagenome is **individually identifying**: Franzosa et al. (2015) showe
 
 ## THESIS INTEGRATION NOTE
 
-How a medical student can turn this report into a computational thesis using `curatedMetagenomicData` + Random Forest + SHAP:
+How can a medical student like me turn this report into a computational thesis?
 
 - **Project framing & exact datasets.** Title: *"A cross-cohort metagenomic classifier of type 2 diabetes: disentangling disease from metformin, with an interpretable SHAP signature as a blueprint for GLP-1 response prediction."* Train on **`QinJ_2012`** (discovery), externally validate on **`KarlssonFH_2013`** (transfer test), contrast against obesity cohorts (**`LeChatelierE_2013`**, **`NielsenHB_2014`**), and **stratify by metformin** throughout — the thesis's novel, defensible spine is reproducing Forslund's metformin-vs-disease disentangling [4] inside a modern, fully reproducible RF+SHAP pipeline, then arguing the same machinery is what a future GLP-1 RA cohort needs. Honest scope: GLP-1 prediction is the *motivation and future-work*, not a result you can deliver from current public data (§5c) — say so explicitly; supervisors value that calibration.
 
