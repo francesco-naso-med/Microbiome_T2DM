@@ -1,0 +1,14 @@
+# Python dependencies for the ML pipeline (python/03_*, python/04_*)
+# Python >= 3.10
+numpy>=1.24
+pandas>=2.0
+scikit-learn>=1.3
+shap>=0.44
+matplotlib>=3.7
+joblib>=1.3
+xgboost>=2.0        # optional comparator model; remove if not used
+
+# R-side dependencies are installed via Bioconductor, not here:
+#   BiocManager::install(c("curatedMetagenomicData", "mia",
+#                          "SummarizedExperiment", "zCompositions"))
+#   install.packages("compositions")

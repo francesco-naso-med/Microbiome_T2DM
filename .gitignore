@@ -1,0 +1,30 @@
+# --- Data (never commit raw or patient-level data; pulled at runtime) ---
+data/processed/
+data/raw/
+*.csv
+!docs/*.csv
+
+# --- Model artifacts & figures (regenerated) ---
+artifacts/
+figures/*.png
+
+# --- Python ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+
+# --- R ---
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# --- OS / editor ---
+.DS_Store
+.vscode/
+.idea/
+.venv_nuova/

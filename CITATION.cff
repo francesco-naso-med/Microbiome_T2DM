@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it as below."
+title: "Gut Microbiome & Type 2 Diabetes: Mechanisms, Evidence, and a Reproducible ML Roadmap"
+abstract: >-
+  A citation-disciplined review of the gut microbiome in Type 2 Diabetes Mellitus
+  paired with a reproducible bioinformatics pipeline (curatedMetagenomicData ->
+  CLR preprocessing -> Random Forest / ElasticNet / XGBoost under nested
+  cross-validation -> SHAP interpretation), designed as the theoretical and
+  computational foundation for a thesis on microbiome-based prediction of T2DM
+  and GLP-1 receptor agonist response.
+type: software
+authors:
+  - family-names: Naso
+    given-names: Francesco
+version: "1.0.0"
+date-released: "2025-01-01"
+license: MIT
+keywords:
+  - gut microbiome
+  - type 2 diabetes
+  - metagenomics
+  - curatedMetagenomicData
+  - machine learning
+  - random forest
+  - SHAP
+  - GLP-1 receptor agonist
+  - compositional data analysis
