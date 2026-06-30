@@ -1,4 +1,4 @@
-# Gut Microbiome & Type 2 Diabetes — Mechanisms, Evidence, and a Reproducible ML Roadmap [W.I.P.]
+# [W.I.P.] Gut Microbiome & Type 2 Diabetes — Mechanisms, Evidence, and a Reproducible ML Roadmap 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Made with R](https://img.shields.io/badge/R-curatedMetagenomicData-276DC3?logo=r)](R/)
