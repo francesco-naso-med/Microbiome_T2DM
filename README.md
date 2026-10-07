@@ -11,7 +11,7 @@
 
 ## Why this repository exists
 
-Most microbiome reviews stop at biology. Most ML tutorials stop at toy data. This repo connects the two: a **Nature-Medicine-level mechanistic review** ([`REPORT.md`](REPORT.md)) whose §6 "Analysis Roadmap" maps one-to-one onto **working code skeletons** ([`/R`](R/), [`/python`](python/)) that load `curatedMetagenomicData`, transform it correctly (CLR for compositional data), train Random Forest / ElasticNet / XGBoost under honest nested cross-validation, and explain predictions with SHAP.
+Most microbiome reviews stop at biology. Most ML tutorials stop at toy data. This repo connects the two: a **A mechanistic review** ([`REPORT.md`](REPORT.md)) whose §6 "Analysis Roadmap" maps one-to-one onto **working code skeletons** ([`/R`](R/), [`/python`](python/)) that load `curatedMetagenomicData`, transform it correctly (CLR for compositional data), train Random Forest / ElasticNet / XGBoost under honest nested cross-validation, and explain predictions with SHAP.
 
 The central scientific thesis it advances: **much of the published "T2DM microbiome signature" is confounded by metformin** (Forslund et al., *Nature* 2015) — and the open, fundable frontier is whether the **baseline microbiome predicts response to GLP-1 receptor agonists** (semaglutide, tirzepatide), for which no public shotgun cohort yet exists.
 
