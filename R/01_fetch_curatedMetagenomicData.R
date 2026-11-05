@@ -61,9 +61,15 @@ export_cohort <- function(se, study) {
   # NOTE: curatedMetagenomicData metformin annotation is incomplete; verify per
   # cohort and, if absent, treat metformin status as a known unmeasured confounder
   # (see REPORT.md sec 6g, pitfall #1).
+  # THREE-STATE flags: TRUE / FALSE / NA (= not annotated). grepl() on NA returns
+  # FALSE, which would silently turn "unknown" into "untreated" -> guard with is.na.
+  # (Python derives the same flags from `treatment`; these columns are for R users.)
   meta$metformin <- NA
+  meta$statins   <- NA
   if ("treatment" %in% colnames(meta)) {
-    meta$metformin <- grepl("metformin", tolower(meta$treatment))
+    tr <- tolower(meta$treatment)
+    meta$metformin <- ifelse(is.na(tr), NA, grepl("metformin", tr))
+    meta$statins   <- ifelse(is.na(tr), NA, grepl("statin", tr))
   }
 
   write.csv(species, file.path(OUT_DIR, paste0(study, "_species.csv")))
