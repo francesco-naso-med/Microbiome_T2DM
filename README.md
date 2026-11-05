@@ -21,7 +21,7 @@ The central scientific thesis it advances: **much of the published "T2DM microbi
 |------|----------|
 | [`REPORT.md`](REPORT.md) | The full review: executive summary, 5 mechanistic axes (SCFA/GLP-1, LPS/TLR4, bile acids/FXR-TGR5, BCAA/mTOR, barrier), a 22-row taxa evidence table (Oxford CEBM grading), a 25-study landmark timeline (2006–2025), a deep GLP-1-RA × microbiome section, the ML roadmap, clinical translation, 7 research gaps, 50+ Vancouver references, and a thesis-integration note. |
 | [`R/01_fetch_curatedMetagenomicData.R`](R/01_fetch_curatedMetagenomicData.R) | Pull `QinJ_2012` (discovery) + `KarlssonFH_2013` (external validation) as `TreeSummarizedExperiment`; export species + pathway matrices and metadata. |
-| [`R/02_preprocess_clr.R`](R/02_preprocess_clr.R) | Prevalence filtering, zero handling, **CLR transform**, train/test export — the compositionally-correct preprocessing. |
+| [`R/02_preprocess_clr.R`](R/02_preprocess_clr.R) | *Optional / exploratory.* CLR on the whole cohort for descriptive analyses. **Not used by the ML pipeline**: in `python/03_*` filtering, zero replacement and CLR are re-fitted inside each CV training fold (`python/clr.py`) to avoid leakage. |
 | [`python/03_train_rf_shap.py`](python/03_train_rf_shap.py) | Nested, stratified CV; RF vs ElasticNet vs XGBoost; **metformin-stratified** evaluation; AUROC/AUPRC/calibration; cross-cohort transfer test. |
 | [`python/04_interpret_shap.py`](python/04_interpret_shap.py) | TreeSHAP global importance, beeswarm, per-patient waterfall, dependence plots. |
 | [`docs/references.bib`](docs/references.bib) | BibTeX for every reference in the report. |
@@ -54,7 +54,7 @@ curatedMetagenomicData            preprocessing (R)                   modeling (
 # install.packages("BiocManager")
 # BiocManager::install(c("curatedMetagenomicData", "mia", "zCompositions"))
 source("R/01_fetch_curatedMetagenomicData.R")   # writes data/processed/*.csv
-source("R/02_preprocess_clr.R")                 # writes data/processed/*_clr.csv
+# source("R/02_preprocess_clr.R")               # optional, exploratory only
 ```
 
 **2. Python — model & explain** (needs Python ≥ 3.10):

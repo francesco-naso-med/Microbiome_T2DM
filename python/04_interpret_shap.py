@@ -42,13 +42,11 @@ FIGS = Path("figures"); FIGS.mkdir(exist_ok=True)
 ARTIFACTS = Path("artifacts")
 
 
-def load_X(cohort: str, feature_names: list[str]) -> pd.DataFrame:
-    X = pd.read_csv(PROCESSED / f"{cohort}_species_clr.csv", index_col=0)
-    # align to the features the model was trained on
-    for f in feature_names:
-        if f not in X.columns:
-            X[f] = 0.0
-    return X[feature_names]
+def load_X(cohort: str, pipeline, feature_names: list[str]) -> pd.DataFrame:
+    """Raw relative abundances -> the SAME frozen CLR the model was trained with."""
+    raw = pd.read_csv(PROCESSED / f"{cohort}_species.csv", index_col=0)
+    Z = pipeline[:-1].transform(raw)          # every step except the classifier
+    return pd.DataFrame(Z, index=raw.index, columns=feature_names)
 
 
 def shorten(names: list[str]) -> list[str]:
@@ -64,8 +62,9 @@ def main() -> None:
     args = ap.parse_args()
 
     bundle = joblib.load(args.model)
-    model, feat = bundle["model"], bundle["feature_names"]
-    X = load_X(args.cohort, feat)
+    pipeline, feat = bundle["pipeline"], bundle["feature_names"]
+    model = pipeline[-1]
+    X = load_X(args.cohort, pipeline, feat)
     X_disp = X.copy(); X_disp.columns = shorten(feat)
 
     print("CLINICAL CAVEAT: SHAP explains the model, not biology. "
