@@ -1,6 +1,6 @@
 # The Gut Microbiome in Type 2 Diabetes Mellitus: Mechanisms, Evidence, and a Computational Roadmap
 
-**Version 1.0 — 2026** · **Target reader:** MD/PhD clinician-scientist with basic bioinformatics literacy · **Companion code:** see [`/R`](R/) and [`/python`](python/)
+**Version 1.1 — November 2026** (v1.1 adds the first validated results of the companion pipeline, §6h) · **Target reader:** MD/PhD clinician-scientist with basic bioinformatics literacy · **Companion code:** see [`/R`](R/) and [`/python`](python/)
 
 ---
 
@@ -17,6 +17,8 @@ Type 2 diabetes mellitus (T2DM) is accompanied by a reproducible, if population-
 5. **Microbiota composition predicts response to glucose-lowering therapy.** Baseline enterotype (*Prevotella*- vs *Bacteroides*-dominant) stratifies acarbose response [9], and baseline microbial diversity predicts metabolic response to lean-donor fecal transplant [8] — the proof-of-concept that a "responder microbiome" is a tractable construct.
 
 **State of the field in 2025.** The field has matured from "the microbiome differs in T2DM" (descriptive, ~2010–2014) to "which microbial functions causally affect glucose metabolism, and can we predict and modulate them" (mechanistic and translational, ~2016–present). Shotgun metagenomics with strain- and pathway-level resolution (MetaPhlAn 4, HUMAnN 3) and harmonized public resources (`curatedMetagenomicData`) now make machine-learning meta-analysis across cohorts routine [10,11]. Translation lags: no microbiome-based diagnostic for T2DM risk is clinically deployed, and therapeutic modulation (probiotics, FMT) produces statistically real but small and non-durable metabolic effects.
+
+**What the companion pipeline found (v1.1, §6h).** On `QinJ_2012`, a leakage-free Random Forest separates T2DM from controls with AUROC ≈ 0.73 (10×10 CV), driven by the expected depletion of butyrate producers; performance is not higher in metformin-treated cases, so within this cohort the signal is not a drug artifact. The same model does **not** transfer to `KarlssonFH_2013` (AUROC ≈ 0.49, 95% CI including 0.5), even after excluding IGT and restricting to drug-free participants on both sides — and the linear (ElasticNet) signature is significantly *inverted*. Population-specific signal, not metformin or labeling, is the most plausible explanation.
 
 **Most urgent open question.** Does the baseline gut microbiome predict — and partly mediate — the heterogeneous metabolic response to GLP-1 receptor agonists, and if so, can a metagenomic signature be used to personalize their use? No public shotgun cohort with pre/post GLP-1 RA sampling currently exists in `curatedMetagenomicData`, making this both the field's clearest gap and its most fundable opportunity.
 
@@ -240,10 +242,10 @@ A reproducible plan to build a predictive model of T2DM (and, as extension, GLP-
 - *Caveat:* SHAP explains the **model**, not biology; a high-SHAP taxon is a correlate within this model, not a proven cause — keep §2's causal grading separate [43] `[INFERENCE]`.
 
 ### 6f. Validation strategy
-- **Internal:** **nested, repeated, stratified k-fold CV** (e.g., 10×10). Feature selection, CLR fitting, and hyperparameter tuning live in the **inner** loop; the **outer** loop estimates generalization. This is the most common source of inflated AUCs when violated.
+- **Internal:** **repeated, stratified k-fold CV** (10×10). Prevalence filtering, zero replacement and CLR are re-fitted inside every training fold (`python/clr.py`, part of the scikit-learn `Pipeline`); violating this is the most common source of inflated AUCs. Hyperparameters are fixed by default; `--tune` adds an inner grid search, making the CV genuinely **nested**.
 - **External:** train on `QinJ_2012`, test on `KarlssonFH_2013` (and vice versa) — report the expected drop, which quantifies cross-population transferability [4,7,10].
 - **Metrics:** AUROC **and** AUPRC (class imbalance), plus a **calibration** curve and Brier score — a diagnostic must be calibrated, not merely discriminative.
-- **Batch/confounder control:** harmonize cohorts with **MMUPHin** or **ConQuR**; include metformin and BMI as covariates or stratify [4,44].
+- **Batch/confounder control:** harmonize cohorts with **MMUPHin** or **ConQuR**; include metformin and BMI as covariates or stratify [4,44]. *(v1.1: medication handled by subgroup scoring, §6h; batch correction not yet implemented.)*
 
 ### 6g. Common pitfalls and how to avoid them
 1. **Metformin confounding** — model or stratify by drug; never call a metformin-driven taxon "diabetic" [4].
@@ -253,6 +255,61 @@ A reproducible plan to build a predictive model of T2DM (and, as extension, GLP-
 5. **Batch/profiler-version effects** — fix MetaPhlAn/HUMAnN versions; report them; correct batch [44].
 6. **p≫n overfitting** — prevalence-filter and regularize.
 7. **Reverse causation** — observational AUC ≠ causality; reserve causal language for interventional/MR/gnotobiotic evidence [5,6].
+
+### 6h. Results (v1.1, November 2026)
+
+**Setup.** Species-level MetaPhlAn relative abundances from `curatedMetagenomicData` (release 2021-10-14). Binary outcome **T2DM vs control** from `study_condition`; excluded: 19 `QinJ_2012` samples with missing condition and 49 IGT participants in `KarlssonFH_2013`. Final sizes: Qin 170 T2DM / 174 controls; Karlsson 53 / 43. One sample per subject in both cohorts (no subject-level leakage). Preprocessing inside each training fold: closure, prevalence filter (≥10% of samples above 10⁻⁴), multiplicative zero replacement, CLR — 155 species retained on the full discovery cohort. Medication (metformin, statins) is encoded as three-state (yes / no / not annotated). Fixed hyperparameters (no tuning).
+
+**Internal validation (`QinJ_2012`, 10×10 stratified CV, mean ± SD across repeats).**
+
+| Model | AUROC | AUPRC (chance 0.49) | Brier |
+|---|---|---|---|
+| Random Forest | 0.732 ± 0.008 | 0.721 ± 0.011 | 0.212 |
+| XGBoost | 0.734 ± 0.012 | 0.718 ± 0.016 | 0.227 |
+| ElasticNet | 0.607 ± 0.012 | 0.571 ± 0.017 | 0.342 |
+
+Tree ensembles are equivalent; the linear model underperforms and is poorly calibrated (untuned, p ≈ n/2).
+
+**Metformin.** Annotation is sparse in Qin: of 170 T2DM cases, 15 are on metformin, 56 confirmed untreated, 99 not annotated. Rather than retraining in tiny strata, the out-of-fold predictions of the main model are scored per T2DM subgroup against controls (stratified bootstrap 95% CI, 2000 resamples):
+
+| Comparison (Qin, out-of-fold) | n | RF AUROC [95% CI] | XGBoost AUROC [95% CI] |
+|---|---|---|---|
+| All T2DM vs controls | 170 vs 174 | 0.736 [0.680–0.788] | 0.741 [0.689–0.793] |
+| T2DM on metformin vs controls | 15 vs 174 | 0.636 [0.479–0.794] | 0.623 [0.448–0.793] |
+| T2DM confirmed untreated vs controls | 56 vs 174 | 0.741 [0.662–0.814] | 0.762 [0.687–0.831] |
+| T2DM not annotated vs controls | 99 vs 174 | 0.748 [0.689–0.809] | 0.748 [0.689–0.806] |
+| Drug-free T2DM vs drug-free controls* | 56 vs 74 | 0.777 [0.691–0.854] | 0.796 [0.714–0.872] |
+
+\*Controls restricted to those with annotated, drug-free treatment status; not directly comparable with the rows above.
+
+If the classifier were detecting metformin rather than disease, treated cases would be the *easiest* to identify. The opposite trend is observed. With 15 treated cases the interval is wide, so the defensible conclusion is limited: **there is no evidence that within-cohort performance is driven by metformin.** That metformin partly masks the disease signature is compatible with these data but not demonstrated `[INFERENCE]`.
+
+**External validation (train on all of Qin, test on `KarlssonFH_2013`, 53 T2DM vs 43 controls; 3/155 model species absent and treated as not detected).**
+
+| Comparison (Karlsson) | n | RF | XGBoost | ElasticNet |
+|---|---|---|---|---|
+| All T2DM vs controls | 53 vs 43 | 0.494 [0.376–0.617] | 0.494 [0.378–0.614] | **0.349 [0.245–0.461]** |
+| T2DM on metformin vs controls | 20 vs 43 | 0.540 [0.392–0.693] | 0.535 [0.384–0.688] | 0.329 [0.192–0.484] |
+| T2DM no metformin vs controls | 33 vs 43 | 0.467 [0.335–0.600] | 0.469 [0.339–0.606] | 0.361 [0.233–0.495] |
+| Drug-free (no metformin, no statins) both sides | 15 vs 32 | 0.463 [0.275–0.637] | 0.467 [0.285–0.654] | 0.333 [0.175–0.510] |
+
+The Qin signature does not transfer. Three explanations were tested and excluded: (i) label definition (IGT now excluded; transfer was already at chance with IGT coded as controls), (ii) metformin, (iii) statins [52], taken by 52 of 145 Karlsson participants — the drug-free contrast is no better. The ElasticNet AUROC is **significantly below 0.5**: the linear CLR signature learned in Qin is partially *reversed* in Karlsson, i.e. some taxa carry opposite associations with T2DM in the two populations. This agrees with the original report that discriminant markers differed between the European and Chinese cohorts [7] and points to population-specific signal (ancestry, sex, age — Karlsson enrolled 70-year-old Swedish women — diet, and laboratory protocol) as the most plausible cause `[INFERENCE]`.
+
+**SHAP interpretation (Random Forest fitted on all of Qin; direction = Spearman ρ between a species' CLR value and its SHAP value).**
+
+| Direction | Species (ranked by mean \|SHAP\|) |
+|---|---|
+| Higher abundance → lower predicted risk | *Roseburia intestinalis* (ρ = −0.93), *Anaerostipes hadrus*, *Haemophilus parainfluenzae*, *Faecalibacterium prausnitzii*, *Agathobaculum butyriciproducens*, *Roseburia inulinivorans*, *Ruminococcus callidus* |
+| Higher abundance → higher predicted risk | *Erysipelatoclostridium ramosum*, *Intestinimonas butyriciproducens*, *Gordonibacter pamelaeae*, *Clostridium citroniae*, *Lawsonibacter asaccharolyticus*, *Coprobacillus cateniformis*, *Bacteroides dorei* |
+| Non-monotonic | *Lactobacillus mucosae* |
+
+The protective set is dominated by butyrate producers, and the risk set overlaps with the opportunistic Clostridia reported by Qin *et al.* [2] — the model uses biologically coherent signal. Two entries do not fit the simple narrative and should not be over-interpreted: *Intestinimonas butyriciproducens* (a butyrate producer associated with higher risk) and *H. parainfluenzae* (an oral-origin taxon often reported increased in T2DM, here protective). These are within-model correlates, not causal claims (§6e).
+
+**Methodological corrections relative to v1.0 of the code.** CLR and filtering moved inside CV folds (previously fitted on the whole cohort); CV made genuinely repeated (previously a single 10-fold split); external transfer re-computes the CLR on the discovery species set (previously, independently computed CLR matrices were intersected, making log-ratios incomparable across cohorts); IGT and unlabeled samples excluded (previously counted as controls); "not annotated" medication no longer treated as "untreated"; SHAP direction computed as a rank correlation (the mean signed SHAP previously reported is ≈0 by construction).
+
+**Limitations.** Two cohorts only; sparse medication metadata in Qin; untuned models; no batch correction; species-level taxonomy only (no pathways or strains); BMI, age and sex not adjusted.
+
+**Next steps.** (1) Leave-one-cohort-out validation adding the other T2DM cohorts available in `curatedMetagenomicData`; (2) identify the taxa whose association reverses between Qin and Karlsson (per-cohort compositional differential abundance, e.g. ANCOM-BC/LinDA [42]); (3) test batch harmonization (MMUPHin [44]) — with the caveat that it may also remove genuine population biology; (4) nested tuning, mainly to rescue ElasticNet calibration.
 
 ---
 
@@ -372,6 +429,7 @@ The gut metagenome is **individually identifying**: Franzosa et al. (2015) showe
 49. Cani PD, Bibiloni R, Knauf C, et al. Changes in gut microbiota control metabolic endotoxemia-induced inflammation in high-fat diet-induced obesity and diabetes in mice. *Diabetes*. 2008;57(6):1470-1481. doi:10.2337/db07-1403.
 50. Truong DT, Franzosa EA, Tickle TL, et al. MetaPhlAn2 for enhanced metagenomic taxonomic profiling. *Nat Methods*. 2015;12(10):902-903. doi:10.1038/nmeth.3589.
 51. Beghini F, McIver LJ, Blanco-Míguez A, et al. Integrating taxonomic, functional, and strain-level profiling of diverse microbial communities with bioBakery 3. *eLife*. 2021;10:e65088. doi:10.7554/eLife.65088.
+52. Vieira-Silva S, Falony G, Belda E, et al. Statin therapy is associated with lower prevalence of gut microbiota dysbiosis. *Nature*. 2020;581(7808):310-315. doi:10.1038/s41586-020-2269-x.
 
 ---
 
