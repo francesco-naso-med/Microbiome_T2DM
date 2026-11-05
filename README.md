@@ -40,7 +40,6 @@ Full tables, subgroup analyses, SHAP directions and limitations: [`REPORT.md` §
 | [`python/04_interpret_shap.py`](python/04_interpret_shap.py) | TreeSHAP global importance with **direction** (rank correlation between abundance and SHAP), beeswarm, per-patient waterfall, dependence plots. |
 | [`docs/references.bib`](docs/references.bib) | BibTeX for every reference in the report. |
 | [`data/README.md`](data/README.md) | Data provenance; why no raw data is committed. |
-| [`CITATION.cff`](CITATION.cff) | Makes the repo formally citable. |
 
 ## The analysis, in one diagram
 
@@ -94,7 +93,7 @@ See the **Thesis Integration Note** at the end of [`REPORT.md`](REPORT.md): exac
 
 ## Citation
 
-If this scaffold or review helps your work, please cite it via [`CITATION.cff`](CITATION.cff).
+If this pipeline or review helps your work, please cite the repository URL: https://github.com/francesco-naso-med/Microbiome_T2DM
 
 ## License
 
